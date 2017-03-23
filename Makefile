@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -std=gnu11 -Wall -g -pthread
+CFLAGS = -std=gnu11 -Wall -g -pthread -lm -D ORIG
+CFLAGS_PHONEBOOK = -std=gnu11 -Wall -g -pthread -lm -D PHONEBOOK
 OBJS = list.o threadpool.o merge_sort.o main.o
 
 .PHONY: all clean test
@@ -16,11 +17,24 @@ $(GIT_HOOKS):
 	@echo
 
 deps := $(OBJS:%.o=.%.o.d)
-%.o: %.c
-	$(CC) $(CFLAGS) -o $@ -MMD -MF .$@.d -c $<
 
-sort: $(OBJS)
+objs:
+	$(CC) $(CFLAGS) -o list.o -MMD -MF .list.o.d -c list.c
+	$(CC) $(CFLAGS) -o threadpool.o -MMD -MF .threadpool.o.d -c threadpool.c
+	$(CC) $(CFLAGS) -o merge_sort.o -MMD -MF .merge_sort.o.d -c merge_sort.c
+	$(CC) $(CFLAGS) -o main.o -MMD -MF .main.o.d -c main.c
+
+objs_phonebook:
+	$(CC) $(CFLAGS_PHONEBOOK) -o list.o -MMD -MF .list.o.d -c list.c
+	$(CC) $(CFLAGS_PHONEBOOK) -o threadpool.o -MMD -MF .threadpool.o.d -c threadpool.c
+	$(CC) $(CFLAGS_PHONEBOOK) -o merge_sort.o -MMD -MF .merge_sort.o.d -c merge_sort.c
+	$(CC) $(CFLAGS_PHONEBOOK) -o main.o -MMD -MF .main.o.d -c main.c
+
+sort: objs
 	$(CC) $(CFLAGS) -o $@ $(OBJS) -rdynamic
+
+sort_phonebook: objs_phonebook
+	$(CC) $(CFLAGS_PHONEBOOK) -o $@ $(OBJS) -rdynamic
 
 genData:
 	uniq test_data/words.txt | sort -R > test_data/input.txt
@@ -52,6 +66,10 @@ repeat-test: sort tools/util-average
 	@echo 3 | sudo tee /proc/sys/vm/drop_caches
 	@bash scripts/repeat-test.sh $(THREADS) $(TEST_DATA_FILE) $(ITERATIONS)
 	@./tools/util-average ./out/repeat-test-result.dat
+
+phonebook: sort_phonebook tools/util-average genData
+	@./sort_phonebook 16 ./test_data/input.txt > result.txt
+	@bash scripts/compare.sh ./test_data/words.txt ./result.txt
 
 clean:
 	rm -f $(OBJS) sort

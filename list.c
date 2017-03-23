@@ -3,6 +3,7 @@
 
 #include "list.h"
 #include "generic_printf.h"
+#include "stringToNum.c"
 
 /**
  * @brief Create a new node with data _val_ and set the next node to _net_
@@ -15,6 +16,16 @@ static node_t *node_new(val_t val, node_t *next)
     /* allocate node */
     node_t *node = malloc(sizeof(node_t));
     node->data = val;
+    node->next = next;
+    return node;
+}
+
+static node_t *node_newp(char *map, node_t *next)
+{
+    /* allocate node */
+    node_t *node = malloc(sizeof(node_t));
+    node->data = stringToNum(map);
+    node->lastName = map;
     node->next = next;
     return node;
 }
@@ -51,6 +62,15 @@ int list_add(llist_t * const list, const val_t val)
     return list->size;
 }
 
+int list_addp(llist_t * const list, const char *map)
+{
+    node_t *e = node_newp(map, NULL);
+    e->next = list->head;
+    list->head = e;
+    list->size++;
+    return list->size;
+}
+
 /**
  * @brief Get the node specified by index
  * If the index is out of range, it will return NULL.
@@ -78,7 +98,12 @@ void list_print(const llist_t * const list)
 {
     const node_t *cur = list->head;
     while (cur) {
+#if defined ORIG
         xprintln(cur->data);
+#elif defined PHONEBOOK
+        for (int i = 0; cur->lastName[i] != '\0'; i++)
+            xprint(cur->lastName[i]);
+#endif
         cur = cur->next;
     }
 }

@@ -2,14 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #include "threadpool.h"
 #include "list.h"
 #include "merge_sort.h"
+#include "file.c"
 
 #define USAGE "usage: ./sort [thread_count] [input_file]\n"
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+#define ALIGN_FILE "./align.txt"
+#define MAX_LAST_NAME_SIZE 14
 
 struct {
     pthread_mutex_t mutex;
@@ -119,11 +125,27 @@ int main(int argc, char const *argv[])
     }
     thread_count = atoi(argv[1]);
 
+#if defined ORIG
     /* Read data */
     the_list = list_new();
     data_count = build_list_from_file(the_list, argv[2]);
 
     max_cut = MIN(thread_count, data_count);
+#elif defined PHONEBOOK
+    /* Read data */
+    file_align(argv[2], ALIGN_FILE, MAX_LAST_NAME_SIZE);
+    int fd = open(ALIGN_FILE, O_RDONLY | O_NONBLOCK);
+    off_t fs = fsize(ALIGN_FILE);
+    data_count = fs/MAX_LAST_NAME_SIZE;
+    the_list = list_new();
+
+    char *map = mmap(NULL, fs, PROT_READ, MAP_SHARED, fd, 0);
+
+    for (int i = 0; i < fs/MAX_LAST_NAME_SIZE; i++)
+        list_addp(the_list, map + MAX_LAST_NAME_SIZE * i);
+
+    max_cut = MIN(thread_count, data_count);
+#endif
 
     /* initialize tasks inside thread pool */
     pthread_mutex_init(&(data_context.mutex), NULL);
@@ -148,10 +170,11 @@ int main(int argc, char const *argv[])
     /* Report */
     duration = (end.tv_sec - start.tv_sec) * 1000 +
                (double)(end.tv_usec - start.tv_usec) / 1000.0f;
+#ifndef PHONEBOOK
     printf("#Total_tasks_consumed: %d\n", consumed_tasks);
     printf("#Elapsed_time: %.3lf ms\n", duration);
     printf("#Throughput: %d (per sec)\n", (uint32_t)(consumed_tasks * 1000 / duration));
-
+#endif
     /* Output sorted result */
     list_print(the_list);
 

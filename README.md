@@ -29,6 +29,14 @@ make check
 ```
 Simple test suite.
 
+## Phonebook version
+```bash
+./sort_phonebook [thread count] [dictionary file]
+```
+```bash
+make phonebook
+```
+
 # Licensing
 `mergesort-concurrent` is freely redistributable under the two-clause BSD
 License. Use of this source code is governed by a BSD-style license that can

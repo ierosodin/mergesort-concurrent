@@ -10,8 +10,11 @@ typedef intptr_t val_t;
  * @brief The basic element of the linked list
  */
 typedef struct node {
+#ifdef PHONEBOOK
+    char *lastName;
+#endif
+    struct node *next;
     val_t data; /**< Data of the node */
-    struct node *next;  /**< Pointer to the next node */
 } node_t;
 
 /**
@@ -25,6 +28,7 @@ typedef struct {
 
 llist_t *list_new();
 int list_add(llist_t * const the_list, const val_t val);
+int list_addp(llist_t * const the_list, const char *);
 void list_print(const llist_t * const the_list);
 node_t *list_get(llist_t * const the_list, const uint32_t index);
 void list_free_nodes(llist_t *the_list);
