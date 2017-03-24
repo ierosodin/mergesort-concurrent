@@ -25,7 +25,9 @@ static node_t *node_newp(char *map, node_t *next)
     /* allocate node */
     node_t *node = malloc(sizeof(node_t));
     node->data = stringToNum(map);
+#ifdef _STRING
     node->lastName = map;
+#endif
     node->next = next;
     return node;
 }
@@ -98,9 +100,9 @@ void list_print(const llist_t * const list)
 {
     const node_t *cur = list->head;
     while (cur) {
-#if defined ORIG
+#if defined _NUMBER
         xprintln(cur->data);
-#elif defined PHONEBOOK
+#elif defined _STRING
         for (int i = 0; cur->lastName[i] != '\0'; i++)
             xprint(cur->lastName[i]);
 #endif

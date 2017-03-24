@@ -125,13 +125,13 @@ int main(int argc, char const *argv[])
     }
     thread_count = atoi(argv[1]);
 
-#if defined ORIG
+#if defined _NUMBER
     /* Read data */
     the_list = list_new();
     data_count = build_list_from_file(the_list, argv[2]);
 
     max_cut = MIN(thread_count, data_count);
-#elif defined PHONEBOOK
+#elif defined _STRING
     /* Read data */
     file_align(argv[2], ALIGN_FILE, MAX_LAST_NAME_SIZE);
     int fd = open(ALIGN_FILE, O_RDONLY | O_NONBLOCK);
@@ -170,7 +170,7 @@ int main(int argc, char const *argv[])
     /* Report */
     duration = (end.tv_sec - start.tv_sec) * 1000 +
                (double)(end.tv_usec - start.tv_usec) / 1000.0f;
-#ifndef PHONEBOOK
+#ifndef _STRING
     printf("#Total_tasks_consumed: %d\n", consumed_tasks);
     printf("#Elapsed_time: %.3lf ms\n", duration);
     printf("#Throughput: %d (per sec)\n", (uint32_t)(consumed_tasks * 1000 / duration));
