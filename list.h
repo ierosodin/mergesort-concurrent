@@ -10,7 +10,7 @@ typedef intptr_t val_t;
  * @brief The basic element of the linked list
  */
 typedef struct node {
-#ifdef _STRING
+#ifdef STRING
     char *lastName;
 #endif
     struct node *next;

@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -std=gnu11 -Wall -g -pthread -lm -D _NUMBER
-CFLAGS_STRING = -std=gnu11 -Wall -g -pthread -lm -D _STRING
+CFLAGS = -std=gnu11 -Wall -g -pthread -lm -D NUMBER
+CFLAGS_STRING = -std=gnu11 -Wall -g -pthread -lm -D STRING
 OBJS = list.o threadpool.o merge_sort.o main.o
 
 .PHONY: all clean test
